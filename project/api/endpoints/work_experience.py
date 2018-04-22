@@ -3,8 +3,12 @@ from webargs import fields
 from webargs.flaskparser import use_args
 
 from project import db
-from project.api.models import WorkExperience, User, Tag
-from project.api.schemas import WorkExperienceSchema, TagSchema
+from project.api.models import WorkExperience, User, Tag, Activity
+from project.api.schemas import (
+    WorkExperienceSchema,
+    TagSchema,
+    ActivitySchema
+)
 from project.api.common.decorators import login_required
 from project.api.common.utils import make_response, set_tags
 
@@ -161,3 +165,13 @@ def set_work_experience_tags(args, id):
         status_code=200,
         status='success',
         data=TagSchema(many=True).dump(tags).data)
+
+
+@bp_work_experience.route('/<id>/activity', methods=['GET'])
+@login_required
+def get_user_activity_list(id):
+    activities = Activity.query.filter_by(work_experience_id=id).all()
+    return make_response(
+        status_code=200,
+        status='success',
+        data=ActivitySchema(many=True).dump(activities).data)

@@ -11,7 +11,8 @@ from ..models import (
     Customer,
     Location,
     ContactPerson,
-    Tag
+    Tag,
+    Activity
 )
 from ..models.enums import EducationType, ResponseType
 from project import ma
@@ -185,3 +186,17 @@ class TagSchema(ma.ModelSchema):
     class Meta:
         model = Tag
     id = fields.Integer(dump_to='_id')
+
+
+class ActivitySchema(ma.ModelSchema):
+    class Meta:
+        model = Activity
+    id = fields.Integer(dump_to='_id')
+    created = fields.DateTime()
+    action = fields.String(dump_to='_descriptive')
+    user = RelatedTo(attribute='user')
+    project_response = RelatedTo(attribute='project_response')
+    education = RelatedTo(attribute='education')
+    work_experience = RelatedTo(attribute='work_experience')
+    customer = RelatedTo(attribute='customer')
+    project = RelatedTo(attribute='project')

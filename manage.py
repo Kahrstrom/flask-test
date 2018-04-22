@@ -59,6 +59,7 @@ def create_db():
 
 @manager.command
 def add_test_data():
+    admin = User.query.get(1)
     tag1 = Tag(**{
         'title': 'Programming'
     })
@@ -72,9 +73,9 @@ def add_test_data():
         'title': 'Creative'
     })
     tag5 = Tag(**{
-        'title': 'Engineering',
-        'user_id': 1
+        'title': 'Engineering'
     })
+    admin.tags.append(tag5)
 
     group = Group(**{
         'name': 'Copenhagen Office',
@@ -88,7 +89,7 @@ def add_test_data():
         'name': 'Application consultant'
     })
 
-    user = User(**{
+    user1 = User(**{
         'email': 'jonatan.tegen@gmail.com',
         'password': 'test',
         'name': 'Jonatan Tegen',
@@ -99,9 +100,9 @@ def add_test_data():
         'title': 'Engineering Physics',
         'school': 'LTH',
         'extent': 'Master\'s degree',
-        'description': 'Learned cool stuff!',
-        'user_id': 1
+        'description': 'Learned cool stuff!'
     })
+    admin.educations.append(education1)
     education2 = Education(**{
         'title': 'Psychology',
         'school': 'Lund University',
@@ -152,17 +153,17 @@ def add_test_data():
     customer.contactpersons.append(contact_person)
     education1.tags.append(tag1)
     education2.tags.append(tag3)
-    user.tags.append(tag2)
-    user.tags.append(tag4)
-    user.educations.append(education2)
-    user.educations.append(education3)
-    user.projectresponses.append(project_response)
+    user1.tags.append(tag2)
+    user1.tags.append(tag4)
+    user1.educations.append(education2)
+    user1.educations.append(education3)
+    user1.projectresponses.append(project_response)
     project.projectresponses.append(project_response)
-    role.users.append(user)
-    group.users.append(user)
+    role.users.append(user1)
+    group.users.append(user1)
     db.session.add(tag5)
     db.session.add(education1)
-    db.session.add(user)
+    db.session.add(user1)
     db.session.add(location1)
     db.session.commit()
 

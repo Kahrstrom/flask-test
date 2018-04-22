@@ -10,10 +10,12 @@ from .endpoints.location import bp_location
 from .endpoints.customer import bp_customer
 from .endpoints.project_response import bp_project_response
 from .endpoints.contact_person import bp_contact_person
+from .endpoints.activity import bp_activity
 from .. import app
 
 
 def register_blueprints():
+    print('{}/{}'.format(app.config['APPLICATION_ROOT'], 'customer'))
     app.register_blueprint(
         bp_user,
         url_prefix='{}/{}'.format(app.config['APPLICATION_ROOT'], 'user'))
@@ -53,3 +55,7 @@ def register_blueprints():
         bp_contact_person,
         url_prefix='{}/{}'.format(
             app.config['APPLICATION_ROOT'], 'contact_person'))
+    app.register_blueprint(
+        bp_activity,
+        url_prefix='{}/{}'.format(
+            app.config['APPLICATION_ROOT'], 'activity'))

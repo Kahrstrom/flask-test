@@ -8,14 +8,16 @@ from project.api.models import (
     Education,
     ProjectResponse,
     WorkExperience,
-    Tag
+    Tag,
+    Activity
 )
 from project.api.schemas import (
     UserSchema,
     EducationSchema,
     ProjectResponseSchema,
     WorkExperienceSchema,
-    TagSchema
+    TagSchema,
+    ActivitySchema
 )
 from project.api.common.decorators import login_required, admin_required
 from project.api.common.utils import make_response, set_tags
@@ -121,6 +123,16 @@ def get_work_experience_list(id):
         status_code=200,
         status='success',
         data=WorkExperienceSchema(many=True).dump(work_experience).data)
+
+
+@bp_user.route('/<id>/activity', methods=['GET'])
+@login_required
+def get_user_activity_list(id):
+    activities = Activity.query.filter_by(user_id=id).all()
+    return make_response(
+        status_code=200,
+        status='success',
+        data=ActivitySchema(many=True).dump(activities).data)
 
 
 @bp_user.route('/<id>/tag', methods=['GET'])

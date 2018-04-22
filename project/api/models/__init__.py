@@ -266,6 +266,21 @@ class Customer(BaseMixin, db.Model):
         return '{}, {}'.format(
             self.name, self.customer_number)
 
+    def add_activity(self, new, session):
+        if not new:
+            return
+
+        origin = self.name
+        target = self._descriptive
+        action = '{target} is now a customer!'
+
+        activity = Activity(**{
+            'action': action,
+            'customer_id': self.id,
+            'target': 'customer'
+        })
+        session.add(activity)
+
 
 class Project(BaseMixin, db.Model):
     title = db.Column(db.String(50), nullable=False)
@@ -284,7 +299,24 @@ class Project(BaseMixin, db.Model):
     @property
     def _descriptive(self):
         return self.title + (
-            ', {}'.format(self.customer.name) if self.customer != '' else '')
+            ' @ {}'.format(self.customer.name) if self.customer != '' else '')
+
+    def add_activity(self, new, session):
+        if not new:
+            return
+
+        origin = self.customer.name
+        target = self.title
+        action = '{origin} added the project {target}'
+
+        activity = Activity(**{
+            'action': action,
+            'customer_id': self.customer.id,
+            'project_id': self.id,
+            'origin': 'customer',
+            'target': 'project'
+        })
+        session.add(activity)
 
 
 class ProjectResponse(BaseMixin, db.Model):
@@ -317,18 +349,21 @@ class ProjectResponse(BaseMixin, db.Model):
         origin = self.user.name
         target = self.project._descriptive
         if self.type == ResponseType.interested.value:
-            action = '{} is interested in the project {}'
+            action = '{origin} is interested in the project {target}'
         elif self.type == ResponseType.accepted.value:
-            action = '{} was accepted for the project {}'
+            action = '{origin} was accepted for the project {target}'
         elif self.type == ResponseType.proposed.value:
-            action = '{} was proposed for the project {}'
+            action = '{origin} was proposed for the project {target}'
         else:
             return
 
         activity = Activity(**{
-            'action': action.format(origin, target),
+            'action': action,
             'user_id': self.user.id,
-            'project_response_id': self.id
+            'project_response_id': self.id,
+            'project_id': self.project.id,
+            'origin': 'user',
+            'target': 'project'
         })
         session.add(activity)
 
@@ -354,6 +389,23 @@ class Education(BaseMixin, ExperienceMixin, db.Model):
         return self.title + (
             ', {}'.format(self.school) if self.school != '' else '')
 
+    def add_activity(self, new, session):
+        if not new:
+            return
+
+        origin = self.user.name
+        target = self._descriptive
+        action = '{origin} added the work experience {target}'
+
+        activity = Activity(**{
+            'action': action,
+            'user_id': self.user.id,
+            'education_id': self.id,
+            'origin': 'user',
+            'target': 'education'
+        })
+        session.add(activity)
+
 
 class WorkExperience(BaseMixin, ExperienceMixin, db.Model):
     title = db.Column(db.String(50), nullable=False)
@@ -370,6 +422,26 @@ class WorkExperience(BaseMixin, ExperienceMixin, db.Model):
     @property
     def _descriptive(self):
         return '{}, {}'.format(self.title, self.employer)
+
+    def add_activity(self, new, session):
+        print(new)
+        if not new:
+            return
+
+        origin = self.user.name
+        target = self._descriptive
+        action = '{origin} added the work experience {target}'
+
+        activity = Activity(**{
+            'action': action,
+            'user_id': self.user.id,
+            'work_experience_id': self.id,
+            'origin': 'user',
+            'target': 'work_experience'
+        })
+        print(activity)
+        session.add(activity)
+        
 
 
 class Tag(db.Model):
@@ -416,6 +488,8 @@ class Activity(db.Model):
     customer = db.relationship('Customer', backref='activities')
 
     action = db.Column(db.String(150), default='')
+    origin = db.Column(db.String(100), default='')
+    target = db.Column(db.String(100), default='')
 
     @property
     def _descriptive(self):
@@ -432,9 +506,11 @@ def test(session, ctx):
             print('nope')
             continue
         instance.add_activity(new=False, session=session)
+        print(instance)
 
     for instance in session.new:
         if not getattr(instance, 'add_activity', None):
             print('nope')
             continue
-        instance.add_activity(new=False, session=session)
+        instance.add_activity(new=True, session=session)
+        print(instance)
